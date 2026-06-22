@@ -1,53 +1,107 @@
 import { useState } from "react";
-import type { Task, TaskStatus, TaskStatusFilter } from "../types/task";
-import { filterTasksByStatus, updateTaskStatus } from "../utils/taskFilters";
+import type { TaskStatusFilter } from "../types/task";
+import type {
+  Task,
+} from "../types/task";
+
+import {
+  filterTasksByStatus,
+  updateTaskStatus,
+} from "../utils/taskFilters";
+
 import { TaskItem } from "./TaskItem";
 
 type TaskBoardProps = {
   initialTasks: Task[];
 };
 
-const ALL_FILTERS: TaskStatusFilter[] = ["all", "pending", "in_progress", "done"];
+export function TaskBoard({
+  initialTasks,
+}: TaskBoardProps) {
+  const [tasks, setTasks] =
+    useState(initialTasks);
 
-export function TaskBoard({ initialTasks }: TaskBoardProps) {
+  const [filter, setFilter] =
+    useState<TaskStatusFilter>("all");
 
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [activeFilter, setActiveFilter] = useState<TaskStatusFilter>("all");
+  const filteredTasks =
+    filterTasksByStatus(
+      tasks,
+      filter,
+    );
 
-  function handleStatusChange(taskId: number, newStatus: TaskStatus) {
-    const updatedTasks = updateTaskStatus(tasks, taskId, newStatus);
+  function handleStatusChange(
+    taskId: number,
+    status:
+      | "pending"
+      | "in_progress"
+      | "done",
+  ) {
+    const updatedTasks =
+      updateTaskStatus(
+        tasks,
+        taskId,
+        status,
+      );
+
     setTasks(updatedTasks);
   }
 
-  const filteredTasks = filterTasksByStatus(tasks, activeFilter);
-
   return (
     <div>
-      <h3>Task Board</h3>
+      <h2>Task Board</h2>
 
       <div>
-        {ALL_FILTERS.map(function(filter) {
-          return (
-            <button key={filter} onClick={function() { setActiveFilter(filter); }}>
-              {filter}
-            </button>
-          );
-        })}
+        <button
+          onClick={() =>
+            setFilter("all")
+          }
+        >
+          All
+        </button>
+
+        <button
+          onClick={() =>
+            setFilter("pending")
+          }
+        >
+          Pending
+        </button>
+
+        <button
+          onClick={() =>
+            setFilter("in_progress")
+          }
+        >
+          In Progress
+        </button>
+
+        <button
+          onClick={() =>
+            setFilter("done")
+          }
+        >
+          Done
+        </button>
       </div>
 
       {filteredTasks.length === 0 ? (
-        <p>No tasks match this filter</p>
+        <p>
+          No tasks match this filter
+        </p>
       ) : (
         <ul>
-          {filteredTasks.map(function(task) {
-            return (
+          {filteredTasks.map(
+            (task) => (
               <TaskItem
                 key={task.id}
                 task={task}
-                onStatusChange={handleStatusChange}
+                onStatusChange={
+                  handleStatusChange
+                }
               />
-            );
-          })}
+            ),
+          )}
         </ul>
       )}
     </div>
